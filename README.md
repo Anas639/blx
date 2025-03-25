@@ -17,13 +17,13 @@ A simple and efficient CLI tool for tracking time spent on tasks and projects.
 Ensure you have Go installed, then run:
 
 ```sh
-go install github.com/Anas639/blx@latest
+go install github.com/anas639/blx@latest
 ```
 
 Or clone and build manually:
 
 ```sh
-git clone https://github.com/Anas639/blx.git
+git clone https://github.com/anas639/blx.git
 cd blx 
 go build
 go install
