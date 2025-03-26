@@ -29,7 +29,7 @@ func NewTask(id int64, name string) *Task {
 func (this *Task) String() string {
 	return fmt.Sprintf("%s [%s]", this.Name, this.Status)
 }
-func (this *Task) getCurrentSession() *TaskSession {
+func (this *Task) getLastSession() *TaskSession {
 	if this.currentSession != nil {
 		return this.currentSession
 	}
@@ -72,7 +72,7 @@ func (this *Task) Pause() (*TaskSession, error) {
 	}
 
 	this.Status = TASK_PAUSED
-	session := this.getCurrentSession()
+	session := this.getLastSession()
 	session.End()
 	this.currentSession = nil
 
@@ -85,7 +85,7 @@ func (this *Task) End() (*TaskSession, error) {
 	}
 
 	this.Status = TASK_ENDED
-	session := this.getCurrentSession()
+	session := this.getLastSession()
 	if session == nil {
 		return nil, fmt.Errorf("[Impossible State] This task has no session!")
 	}
@@ -96,7 +96,7 @@ func (this *Task) End() (*TaskSession, error) {
 }
 
 func (this *Task) GetLastSessionDuration() time.Duration {
-	lastSession := this.getCurrentSession()
+	lastSession := this.getLastSession()
 	if lastSession != nil {
 		return lastSession.Duration().Round(time.Second)
 	}
@@ -142,4 +142,41 @@ func (this *Task) GetProjectName() string {
 		return "N/A"
 	}
 	return this.Project.Name
+}
+
+func (this *Task) IsOngoing() bool {
+	return this.Status == TASK_ONGOING
+}
+
+func (this *Task) getTotalElapsedTime() time.Duration {
+	seconds := 0.0
+
+	for _, s := range this.sessions {
+		if s.isOngoing() {
+			seconds += time.Now().Sub(s.StartsAt).Seconds()
+		} else {
+			seconds += s.Duration().Seconds()
+		}
+	}
+
+	return time.Duration(seconds) * time.Second
+}
+
+func (this *Task) GetElapsedTime(mode TimerMode) time.Duration {
+	sessionsLen := len(this.sessions)
+	if sessionsLen == 0 {
+		return time.Duration(0)
+	}
+	switch mode {
+	case TIMER_MODE_SESSION:
+		{
+			session := this.sessions[sessionsLen-1]
+			return time.Now().Sub(session.StartsAt)
+		}
+	case TIMER_MODE_TASK:
+		{
+			return this.getTotalElapsedTime()
+		}
+	}
+	return time.Duration(0)
 }

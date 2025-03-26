@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newUpdateCmd(ctx *Context) *cobra.Command {
+func newTaskUpdateCmd(ctx *Context) *cobra.Command {
 	updateCmd := &cobra.Command{
 		Use:   "update <task_id>",
 		Args:  cobra.ExactArgs(1),
@@ -57,7 +57,7 @@ func newUpdateCmd(ctx *Context) *cobra.Command {
 
 func getTask(ctx *Context, taskId int64) (*task.Task, error) {
 	taskService := services.NewTaskService(ctx.DB)
-	return taskService.GetTaskById(taskId)
+	return taskService.GetTaskById(taskId, task.TaskFilter{})
 }
 
 func updateTaskName(ctx *Context, taskId int64, newName string) error {

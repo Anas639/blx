@@ -102,7 +102,7 @@ func (this *TaskService) GetTasks(filter task.TaskFilter) ([]*task.Task, error) 
 }
 
 func (this *TaskService) StartTask(taskId int64) (*task.Task, error) {
-	task, err := this.GetTaskById(taskId)
+	task, err := this.GetTaskById(taskId, task.TaskFilter{})
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (this *TaskService) StartTask(taskId int64) (*task.Task, error) {
 }
 
 func (this *TaskService) EndTask(taskId int64) (*task.Task, error) {
-	task, err := this.GetTaskById(taskId)
+	task, err := this.GetTaskById(taskId, task.TaskFilter{})
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func (this *TaskService) EndTask(taskId int64) (*task.Task, error) {
 }
 
 func (this *TaskService) PauseTask(taskId int64) (*task.Task, error) {
-	task, err := this.GetTaskById(taskId)
+	task, err := this.GetTaskById(taskId, task.TaskFilter{})
 	if err != nil {
 		return nil, err
 	}
@@ -199,8 +199,49 @@ func (this *TaskService) AssignProject(taskId int64, projectId int64) error {
 	return nil
 }
 
-func (this *TaskService) GetTaskById(taskId int64) (*task.Task, error) {
-	stmt, err := this.db.Prepare("select t.id,t.name,t.status, t.project_id, p.name as \"project_name\" from tasks t left join projects p on t.project_id = p.id where t.id = ?")
+func (this *TaskService) GetLastActiveTask() (*task.Task, error) {
+	q := "select t.id,t.name,t.status, t.project_id, p.name as \"project_name\" from tasks t left join projects p on t.project_id = p.id inner join task_sessions ts on ts.task_id = t.id where t.status=\"ongoing\" and ts.start_time = (select MAX(start_time) from task_sessions where end_time is null);"
+	row := this.db.QueryRow(q)
+	var id int64
+	var name string
+	var status string
+	var project_id sql.NullInt64
+	var project_name sql.NullString
+	err := row.Scan(&id, &name, &status, &project_id, &project_name)
+	if err != nil {
+		return nil, fmt.Errorf("No active task found")
+	}
+	t := task.NewTask(id, name)
+	if project_id.Valid {
+		t.SetProject(project_id.Int64, project_name.String)
+	}
+	t.SetStatus(status)
+	sessions, err := this.getTaskSessions(t.Id)
+	if err == nil {
+		t.SetSessions(sessions)
+	}
+	return t, nil
+}
+
+func (this *TaskService) GetTaskById(taskId int64, filter task.TaskFilter) (*task.Task, error) {
+
+	var statusFilter string
+
+	if filter.Statuses != nil && len(filter.Statuses) > 0 {
+		sfBuilder := strings.Builder{}
+		sfBuilder.WriteString("and t.status in (")
+		for i, status := range filter.Statuses {
+			sfBuilder.WriteString(fmt.Sprintf("\"%s\"", status))
+			if i < len(filter.Statuses)-1 {
+				sfBuilder.WriteString(",")
+			}
+		}
+		sfBuilder.WriteString(")")
+		statusFilter = sfBuilder.String()
+	}
+
+	q := "select t.id,t.name,t.status, t.project_id, p.name as \"project_name\" from tasks t left join projects p on t.project_id = p.id where t.id = ? %s"
+	stmt, err := this.db.Prepare(fmt.Sprintf(q, statusFilter))
 	defer stmt.Close()
 	if err != nil {
 		return nil, err

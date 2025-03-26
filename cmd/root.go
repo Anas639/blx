@@ -39,7 +39,8 @@ You can list tasks with filtering options and view project-related tasks.`,
 	pauseCmd := newTaskPauseCmd(ctx)
 	endCmd := newTaskEndCmd(ctx)
 	delCmd := newTaskDeleteCmd(ctx)
-	updateCmd := newUpdateCmd(ctx)
+	updateCmd := newTaskUpdateCmd(ctx)
+	timeCmd := newTaskTimeCmd(ctx)
 
 	rootCmd.AddCommand(newCmd)
 	rootCmd.AddCommand(lsCmd)
@@ -48,6 +49,7 @@ You can list tasks with filtering options and view project-related tasks.`,
 	rootCmd.AddCommand(endCmd)
 	rootCmd.AddCommand(delCmd)
 	rootCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(timeCmd)
 
 	// project
 	prjCmd := newProjectCmd(ctx)
