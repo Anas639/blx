@@ -43,7 +43,8 @@ If you don't provide a <task_id> then the last active task will be selected.`,
 			isPassiveMode, _ := strconv.ParseBool(cmd.Flag("passive").Value.String())
 			if !isPassiveMode {
 				timeTracker := tui.NewTrackerFromElapsed(elapsedTime)
-				timeTracker.Start()
+				ch := timeTracker.Start()
+				<-ch
 			} else {
 				fmt.Printf("%s", time.Duration(elapsedTime)*time.Second)
 			}

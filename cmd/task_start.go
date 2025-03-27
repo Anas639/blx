@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"strconv"
 
+	"github.com/anas639/blx/internal/event"
 	"github.com/anas639/blx/internal/services"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +26,8 @@ If the task was paused, it resumes from where it left off.`,
 			if err != nil {
 				return err
 			}
-			fmt.Println(task)
+			ctx.TaskPrinter.PrintSingle(task)
+			ctx.Broadcaster.SendEvent(event.NewPayload(event.EVENT_START, task.Id))
 			return nil
 		},
 	}

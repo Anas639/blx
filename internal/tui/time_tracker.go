@@ -7,17 +7,25 @@ import (
 	"time"
 )
 
+type PrintMode int8
+
+const (
+	PRINTMODE_NEWLINE PrintMode = iota
+	PRINTMODE_SINGLELINE
+)
+
 type TimeTracker interface {
 	SetWriter(writer io.Writer)
-	Start()
+	Start() chan struct{}
 	Stop()
+	SetPrintMode(mode PrintMode)
 }
 
 func NewTrackerFromElapsed(elapsed float64) TimeTracker {
 	return &timeTracker{
 		elapsedSeconds: elapsed,
 		writer:         os.Stdout,
-		isRunning:      make(chan bool),
+		isRunning:      make(chan struct{}),
 	}
 }
 
@@ -30,33 +38,41 @@ func NewTrackerFromTime(from time.Time) TimeTracker {
 type timeTracker struct {
 	elapsedSeconds float64
 	writer         io.Writer
-	isRunning      chan bool
+	isRunning      chan struct{}
+	mode           PrintMode
 }
 
+func (this *timeTracker) SetPrintMode(mode PrintMode) {
+	this.mode = mode
+}
 func (this *timeTracker) SetWriter(writer io.Writer) {
 	this.writer = writer
 }
-func (this *timeTracker) Start() {
+func (this *timeTracker) Start() chan struct{} {
 	go this.run()
-	<-this.isRunning
+	return this.isRunning
 }
 
 func (this *timeTracker) Stop() {
-	this.isRunning <- false
+	close(this.isRunning)
 }
 
 func (this *timeTracker) run() {
+	format := "\r\033[K%s"
+	if this.mode == PRINTMODE_NEWLINE {
+		format = "%s\n"
+	}
 	for {
 		ticker := time.Tick(time.Second)
-		fmt.Printf("\r\033[K%s", time.Duration(this.elapsedSeconds)*time.Second)
+		fmt.Printf(format, time.Duration(this.elapsedSeconds)*time.Second)
 		select {
 		case <-ticker:
 			{
 				this.elapsedSeconds++
 			}
-		case r := <-this.isRunning:
+		case _, ok := <-this.isRunning:
 			{
-				if !r {
+				if !ok {
 					return
 				}
 			}

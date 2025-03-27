@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/anas639/blx/internal/event"
 	"github.com/anas639/blx/internal/services"
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,7 @@ Ended tasks cannot be resumed!`,
 			}
 			fmt.Printf("[ ⏰ %s ] Task Successfully ended 🏁 \n", task.CalculateDuration())
 			ctx.TaskPrinter.PrintSingle(task)
+			ctx.Broadcaster.SendEvent(event.NewPayload(event.EVENT_END, task.Id))
 			return nil
 		},
 	}

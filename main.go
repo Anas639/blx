@@ -7,6 +7,7 @@ import (
 
 	"github.com/anas639/blx/cmd"
 	"github.com/anas639/blx/internal/database"
+	"github.com/anas639/blx/internal/event/udp"
 	"github.com/anas639/blx/internal/printer"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -23,6 +24,8 @@ func main() {
 		DB:             db,
 		TaskPrinter:    printer.NewPrettyTaskPrinter(),
 		ProjectPrinter: printer.NewPrettyProjectPrinter(),
+		Listener:       udp.NewUDPListener(),
+		Broadcaster:    udp.NewUDPBroadcaster(),
 	})
 	rootCmd.Execute(ctx)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/anas639/blx/internal/event"
 	"github.com/anas639/blx/internal/services"
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,7 @@ Use "start <task_id>" to resume.`,
 
 			fmt.Printf("[ ⏰ %s ] Task Paused ⏸️ \n", task.GetLastSessionDuration())
 			ctx.TaskPrinter.PrintSingle(task)
+			ctx.Broadcaster.SendEvent(event.NewPayload(event.EVENT_PAUSE, task.Id))
 			return nil
 		},
 	}
