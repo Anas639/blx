@@ -1,7 +1,14 @@
 # Changelog
 
+## 0.0.2 - [2025-03-27]
 
-## 0.0.1
+### Added
+
+- Introduce the `time` command to track the elapsed time in real-time
+- Implement a UDP-based local event system
+- Introduce the `watch` command to listen on task events locally (useful for third parties like Polybar Modules)
+
+## 0.0.1 - [2025-03-25]
 
 ### Added
 - Create task
