@@ -160,7 +160,7 @@ blx project delete <project_id>
 
     ```sh
     blx pause <task_id>
-    blx task end <task_id>
+    blx end <task_id>
     ```
 
 5. List tasks:
@@ -168,6 +168,67 @@ blx project delete <project_id>
    ```sh
    blx ls
    ```
+
+## Polybar Integration
+
+To integrate *blx* into your *polybar* configuration:
+
+### Add *blx* module to your `modules.ini`
+
+Your `modules.ini` file is probably located at `~/.config/polybar/`
+
+  ```ini 
+  [module/blx]
+  type = custom/script
+  exec = ~/.config/polybar/scripts/blx.sh
+  label-foreground = ${colors.white}
+  label-background = ${colors.base}
+  label=󱎫 %output%
+  tail=true
+  ```
+
+### Create a custom script
+
+  ```sh
+  mkdir ~/.config/polybar/scripts 
+  touch ~/.config/polybar/scripts/blx.sh
+  chmod +x ~/.config/polybar/scripts/blx.sh
+  ```
+
+
+Then call `blx watch` from your custom script
+
+  ```sh 
+  #!/bin/zsh
+
+  BLX="$HOME/go/bin/blx"
+  $BLX watch 
+  
+  ```
+
+### Add the *blx* module to your `config.ini`
+
+Your `config.ini` is probably located at `~/.config/polybar/`
+
+```ini 
+modules-right = blx
+```
+
+*blx* will now appear on the right side of your bar
+
+![Polybar No Task](./assets/polybar_no_task.png "No Task")
+
+  ```sh 
+  blx start <task_id>
+  ```
+
+![Polybar Task Started](./assets/polybar_task_start.png "Task Started")
+
+  ```sh 
+  blx pause <task_id>
+  ```
+
+![Polybar Task Paused](./assets/polybar_task_pause.png "Task Paused")
 
 ## License
 
