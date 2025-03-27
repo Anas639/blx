@@ -83,6 +83,32 @@ blx update <task_id> --project <project_id>
 blx delete <task_id>
 ```
 
+#### Check Elapsed Time
+
+The `time` command displays the elapsed time of an ongoing task.
+
+If you don't you provide a `task_id`, the `time` command will fetch the last active task
+
+```sh
+blx time <task_id>
+```
+
+
+
+#### Watch tasks
+
+The `watch` command listens for incoming task events and prints them.
+
+When you start a task the `watch` command displays the elapsed time. If you pause or stop a task, it prints
+the current status. If there's an older ongoing task, `watch` automatically switches to tracking that task.
+
+```sh
+blx watch 
+```
+
+> The `watch` command is different from the `time` command. `time` will only print elapsed time of a single task and won't listen on events
+
+
 ### Project Commands
 
 #### Create a new project
