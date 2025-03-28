@@ -38,6 +38,17 @@ To start tracking time use the --start flag or run blx start <id>
 					task.SetProject(project.Id, project.Name)
 				}
 			}
+			// check if should start
+			shouldStart, _ := strconv.ParseBool(cmd.Flag("start").Value.String())
+			if shouldStart {
+				t, err := startTaskById(ctx, task.Id)
+				if err != nil {
+					fmt.Println(err.Error())
+				} else {
+					task.SetStatus(t.Status)
+					task.SetSessions(t.GetSessions())
+				}
+			}
 			fmt.Println("Task successfully created ✅")
 			ctx.TaskPrinter.PrintSingle(task)
 			return nil

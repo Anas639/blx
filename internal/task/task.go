@@ -180,3 +180,7 @@ func (this *Task) GetElapsedTime(mode TimerMode) time.Duration {
 	}
 	return time.Duration(0)
 }
+
+func (this *Task) GetSessions() []*TaskSession {
+	return this.sessions
+}

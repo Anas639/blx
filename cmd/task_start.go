@@ -5,6 +5,7 @@ import (
 
 	"github.com/anas639/blx/internal/event"
 	"github.com/anas639/blx/internal/services"
+	"github.com/anas639/blx/internal/task"
 	"github.com/spf13/cobra"
 )
 
@@ -21,15 +22,23 @@ If the task was paused, it resumes from where it left off.`,
 			if err != nil {
 				return err
 			}
-			taskService := services.NewTaskService(ctx.DB)
-			task, err := taskService.StartTask(int64(taskId))
+			task, err := startTaskById(ctx, int64(taskId))
 			if err != nil {
 				return err
 			}
 			ctx.TaskPrinter.PrintSingle(task)
-			ctx.Broadcaster.SendEvent(event.NewPayload(event.EVENT_START, task.Id))
 			return nil
 		},
 	}
 	return startCmd
+}
+
+func startTaskById(ctx *Context, taskId int64) (*task.Task, error) {
+	taskService := services.NewTaskService(ctx.DB)
+	task, err := taskService.StartTask(int64(taskId))
+	if err != nil {
+		return nil, err
+	}
+	ctx.Broadcaster.SendEvent(event.NewPayload(event.EVENT_START, task.Id))
+	return task, nil
 }
