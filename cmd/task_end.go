@@ -6,6 +6,7 @@ import (
 
 	"github.com/anas639/blx/internal/event"
 	"github.com/anas639/blx/internal/services"
+	"github.com/anas639/blx/internal/task"
 	"github.com/spf13/cobra"
 )
 
@@ -23,13 +24,13 @@ Ended tasks cannot be resumed!`,
 				return err
 			}
 			taskService := services.NewTaskService(ctx.DB)
-			task, err := taskService.EndTask(int64(taskId))
+			tsk, err := taskService.EndTask(int64(taskId))
 			if err != nil {
 				return err
 			}
-			fmt.Printf("[ ⏰ %s ] Task Successfully ended 🏁 \n", task.CalculateDuration())
-			ctx.TaskPrinter.PrintSingle(task)
-			ctx.Broadcaster.SendEvent(event.NewPayload(event.EVENT_END, task.Id))
+			fmt.Printf("[ ⏰ %s ] Task Successfully ended 🏁 \n", tsk.GetElapsedTime(task.TIMER_MODE_TASK))
+			ctx.TaskPrinter.PrintSingle(tsk)
+			ctx.Broadcaster.SendEvent(event.NewPayload(event.EVENT_END, tsk.Id))
 			return nil
 		},
 	}

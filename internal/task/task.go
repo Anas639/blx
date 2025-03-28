@@ -103,16 +103,6 @@ func (this *Task) GetLastSessionDuration() time.Duration {
 	return time.Duration(0) * time.Second
 }
 
-func (this *Task) CalculateDuration() time.Duration {
-	seconds := 0.0
-
-	for _, s := range this.sessions {
-		seconds += s.Duration().Seconds()
-	}
-
-	return time.Duration(seconds) * time.Second
-}
-
 func (this *Task) SetStatus(status string) {
 	values := map[string]TaskStatus{
 		"new":     TASK_NEW,

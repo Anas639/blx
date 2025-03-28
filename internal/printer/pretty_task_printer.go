@@ -27,9 +27,9 @@ func (this *PrettyTaskPrinter) PrintMany(tasks []*task.Task) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"#", "Name", "Status", "Duration", "Project"})
-	for _, task := range tasks {
+	for _, tsk := range tasks {
 		t.AppendRow(table.Row{
-			task.Id, task.Name, task.Status, task.CalculateDuration(), task.GetProjectName(),
+			tsk.Id, tsk.Name, tsk.Status, tsk.GetElapsedTime(task.TIMER_MODE_TASK), tsk.GetProjectName(),
 		})
 
 	}
