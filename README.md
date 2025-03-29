@@ -169,6 +169,20 @@ blx project delete <project_id>
    blx ls
    ```
 
+By default `ls` will list ongoing tasks only. If you wish to list all the tasks 
+use `--all` or `-a`.
+
+   ```sh
+   blx ls -a
+   ```
+
+You can also filter by statuses (new, ongoing, paused, ended) using `--status` or `-s`
+
+   ```sh
+   blx ls -s new # list new tasks only
+   blx ls -s ongoing,paused # list ongoing and paused tasks
+   ```
+
 ## Polybar Integration
 
 To integrate *blx* into your *polybar* configuration:

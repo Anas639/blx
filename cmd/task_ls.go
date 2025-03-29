@@ -17,11 +17,20 @@ func newTaskLsCmd(ctx *Context) *cobra.Command {
 Example: blx ls --status ongoing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			taskService := services.NewTaskService(ctx.DB)
+			// by default we list ongoing tasks only
+			statuses := []task.TaskStatus{task.TASK_ONGOING}
+
 			shouldListAllStatuses, err := strconv.ParseBool(cmd.Flag("all").Value.String())
-			statuses := []task.TaskStatus{}
-			if !shouldListAllStatuses {
-				statuses = append(statuses, task.TASK_ONGOING, task.TASK_PAUSED)
+
+			if shouldListAllStatuses {
+				statuses = task.AllStatuses()
+			} else {
+				statusFlag, err := cmd.Flags().GetStringSlice("status")
+				if err == nil && len(statusFlag) > 0 {
+					statuses = task.StatusesFromSlice(statusFlag)
+				}
 			}
+
 			tasks, err := taskService.GetTasks(
 				task.TaskFilter{
 					Statuses: statuses,
@@ -35,6 +44,7 @@ Example: blx ls --status ongoing`,
 		},
 	}
 
-	lsCmd.Flags().BoolP("all", "a", false, "Lists tasks with any status")
+	lsCmd.Flags().BoolP("all", "a", false, "Lists all the tasks no matter the status")
+	lsCmd.Flags().StringSliceP("status", "s", nil, "List tasks with status [new,ongoing,paused,ended]")
 	return lsCmd
 }
