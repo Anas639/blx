@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 - [2025-03-29]
+
+### Added
+
+- Assign task to an existing project during creation using the `--project` flag
+- Automatically start a task after creating it using the `--start` flag
+- Add status filter using the `--status` flag when listing tasks
+
+### Fixed
+
+- Fix nil reference error caused by udpListener using nil UDPConn 
+
 ## 0.2.0 - [2025-03-27]
 
 ### Added
