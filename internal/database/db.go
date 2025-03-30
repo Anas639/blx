@@ -11,22 +11,26 @@ const DB_VERSION = 1
 
 func InitDB() (*sql.DB, error) {
 	dbDir := path.Join(os.Getenv("HOME"), ".local/share/blx")
+	dbPath := path.Join(dbDir, "blx.db")
 	if _, err := os.Stat(dbDir); os.IsNotExist(err) {
 		err := os.Mkdir(dbDir, os.FileMode(0766))
 		if err != nil {
 			return nil, err
 		}
 	}
+	_, err := os.Stat(dbPath)
+	dbExists := err == nil
 	db, err := sql.Open("sqlite3", path.Join(dbDir, "blx.db?_foreign_keys=on"))
 
 	err = migrateDB(db)
 	if err != nil {
 		return nil, err
 	}
-	err = createTables(db)
-
-	if err != nil {
-		return nil, err
+	if !dbExists {
+		err = createTables(db)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil
@@ -58,6 +62,52 @@ func createTables(db *sql.DB) error {
 		UNIQUE (id, task_id),
 		FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
 		)
+		`,
+		`create virtual table if not exists tasks_fts using fts5(name)`,
+		`create virtual table if not exists projects_fts using fts5(name)`,
+		`drop trigger if exists tasks_ai`,
+		`drop trigger if exists tasks_au`,
+		`drop trigger if exists tasks_ad`,
+		`
+		create trigger tasks_ai after insert on tasks
+		begin
+			insert into tasks_fts (rowid, name) values (new.id, new.name);
+		end
+		`,
+		`
+		create trigger tasks_au after update on tasks
+		begin
+			delete from tasks_fts where rowid = old.id;
+			insert into tasks_fts (rowid,name) values(new.id, new.name);
+		end
+		`,
+		`
+		create trigger tasks_ad after delete on tasks
+		begin
+			delete from tasks_fts where rowid = old.id;
+		end
+		`,
+		`drop trigger if exists projects_ai`,
+		`drop trigger if exists projects_au`,
+		`drop trigger if exists projects_ad`,
+		`
+		create trigger projects_ai after insert on projects
+		begin
+			insert into projects_fts (rowid, name) values (new.id, new.name);
+		end
+		`,
+		`
+		create trigger projects_au after update on projects
+		begin
+			delete from projects_fts where rowid = old.id;
+			insert into projects_fts (rowid,name) values(new.id, new.name);
+		end
+		`,
+		`
+		create trigger projects_ad after delete on projects
+		begin
+			delete from projects_fts where rowid = old.id;
+		end
 		`,
 	}
 	for _, q := range queries {
