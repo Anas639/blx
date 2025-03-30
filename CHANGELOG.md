@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 - [2025-03-30]
+
+### Added
+
+- Implement `find` command to run a  full-text search on task and project names
+- Implement `project find` to run a full-text search on project names
+
+### Changed
+
+- Skip DB initialization if the DB file exists to speed up startup.
+
+
 ## 0.3.0 - [2025-03-29]
 
 ### Added
