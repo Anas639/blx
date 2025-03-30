@@ -3,7 +3,7 @@ APP_NAME = blx
 INSTALL_DIR = $(GOPATH)/bin
 
 build:
-	go build -o $(APP_NAME) .
+	go build --tags "fts5" -o $(APP_NAME) .
 
 install: build
 	mv $(APP_NAME) $(INSTALL_DIR)/$(APP_NAME)

@@ -18,10 +18,10 @@ func NewTaskService(db *sql.DB) *TaskService {
 
 func (this *TaskService) CreateTask(name string) (*task.Task, error) {
 	stmt, err := this.db.Prepare("INSERT INTO tasks(name) VALUES(?)")
-	defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer stmt.Close()
 	res, err := stmt.Exec(name)
 	if err != nil {
 		return nil, err
@@ -329,4 +329,61 @@ func (this *TaskService) endTaskSession(session *task.TaskSession) error {
 	}
 	_, err = stmt.Exec(session.EndsAt, session.Id)
 	return nil
+}
+
+func (this *TaskService) Search(keyword string, filter task.TaskFilter) ([]*task.Task, error) {
+	tasks := []*task.Task{}
+
+	var statusFilter string
+	if filter.Statuses != nil && len(filter.Statuses) > 0 {
+		sfBuilder := strings.Builder{}
+		sfBuilder.WriteString("AND t.status in (")
+		for i, status := range filter.Statuses {
+			sfBuilder.WriteString(fmt.Sprintf("\"%s\"", status))
+			if i < len(filter.Statuses)-1 {
+				sfBuilder.WriteString(",")
+			}
+		}
+		sfBuilder.WriteString(")")
+		statusFilter = sfBuilder.String()
+	}
+	q := `
+SELECT t.id,t.name,t.status, t.project_id, p.name as "project_name"
+FROM tasks t
+LEFT JOIN projects p ON t.project_id = p.id
+WHERE (t.id IN (SELECT rowid FROM tasks_fts WHERE name MATCH '%s*') %s)
+OR (p.id IS NOT NULL AND p.id IN (SELECT rowid FROM projects_fts WHERE name MATCH '%s*'));
+	`
+	res, err := this.db.Query(fmt.Sprintf(q, keyword, statusFilter, keyword))
+	if err != nil {
+		return nil, err
+	}
+
+	for res.Next() {
+		var id int64
+		var name string
+		var status string
+		var project_id sql.NullInt64
+		var project_name sql.NullString
+		err = res.Scan(&id, &name, &status, &project_id, &project_name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		task := task.NewTask(id, name)
+		task.SetStatus(status)
+		sessions, err := this.getTaskSessions(task.Id)
+		if err == nil {
+			task.SetSessions(sessions)
+		}
+
+		if project_id.Valid {
+			task.SetProject(project_id.Int64, project_name.String)
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
 }

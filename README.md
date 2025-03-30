@@ -108,6 +108,37 @@ blx watch
 
 > The `watch` command is different from the `time` command. `time` will only print elapsed time of a single task and won't listen on events
 
+#### Find Task
+
+`find` searches for matches in the task name or project name.
+Consider The following tasks:
+
+```sh
+$ blx ls -a      
++---+-----------------------------------------------+--------+----------+---------+
+| # | NAME                                          | STATUS | DURATION | PROJECT |
++---+-----------------------------------------------+--------+----------+---------+
+| 1 | this is an example                            | new    |       0s | N/A     |
+| 2 | more examples                                 | new    |       0s | N/A     |
+| 3 | this won't be selected                        | paused |      47s | N/A     |
+| 4 | this will be selected because of project name | new    |       0s | example |
++---+-----------------------------------------------+--------+----------+---------+
+
+```
+
+We will find tasks that contain the keyword *"exam"* in the task name or project name.
+
+```sh 
+
+$ blx find "exam"
++---+-----------------------------------------------+--------+----------+---------+
+| # | NAME                                          | STATUS | DURATION | PROJECT |
++---+-----------------------------------------------+--------+----------+---------+
+| 1 | this is an example                            | new    |       0s | N/A     |
+| 2 | more examples                                 | new    |       0s | N/A     |
+| 4 | this will be selected because of project name | new    |       0s | example |
++---+-----------------------------------------------+--------+----------+---------+
+```
 
 ### Project Commands
 
