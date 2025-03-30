@@ -118,3 +118,32 @@ func (this *ProjectService) UpdateProjectName(projectId int64, newName string) e
 	}
 	return nil
 }
+
+func (this *ProjectService) Search(keyword string) ([]*project.Project, error) {
+	projects := []*project.Project{}
+
+	q := `
+SELECT p.id,p.name
+FROM projects p
+WHERE p.id IN (SELECT rowid FROM projects_fts WHERE name MATCH '%s*');
+	`
+	res, err := this.db.Query(fmt.Sprintf(q, keyword))
+	if err != nil {
+		return nil, err
+	}
+
+	for res.Next() {
+		var id int64
+		var name string
+		err = res.Scan(&id, &name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		project := project.NewProject(id, name)
+		projects = append(projects, project)
+	}
+
+	return projects, nil
+}

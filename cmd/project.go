@@ -14,10 +14,13 @@ func newProjectCmd(ctx *Context) *cobra.Command {
 	lsProject := newProjectLsCmd(ctx)
 	deleteProject := newProjectDeleteCmd(ctx)
 	updateProject := newProjectUpdateCmd(ctx)
+	findCmd := newProjectFindCmd(ctx)
+
 	projectCmd.AddCommand(createProject)
 	projectCmd.AddCommand(lsProject)
 	projectCmd.AddCommand(deleteProject)
 	projectCmd.AddCommand(updateProject)
+	projectCmd.AddCommand(findCmd)
 
 	return projectCmd
 }

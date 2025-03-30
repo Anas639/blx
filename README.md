@@ -166,6 +166,37 @@ blx project update <project_id> --name "New Project Name"
 blx project delete <project_id>
 ```
 
+
+#### Find Project
+
+`project find` searches for matches in the project name.
+Consider The following projects:
+
+```sh
+$ blx project ls            
++---+---------+
+| # | NAME    |
++---+---------+
+| 1 | example |
+| 2 | proj 1  |
+| 3 | proj 2  |
+| 4 | proj 3  |
++---+---------+
+```
+
+We will find projects that contain the keyword *"pro"* in the project name.
+
+```sh 
+$ blx project find "pro" 
++---+--------+
+| # | NAME   |
++---+--------+
+| 2 | proj 1 |
+| 3 | proj 2 |
+| 4 | proj 3 |
++---+--------+
+```
+
 ## Example Workflow
 
 1. Create a project:
